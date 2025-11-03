@@ -3,11 +3,13 @@ version: '3.8'
 services:
   postgres:
     image: ankane/pgvector:postgres-15
+    container_name: voltedge-postgres
     restart: always
     environment:
       POSTGRES_USER: voltedge
       POSTGRES_PASSWORD: voltedge
       POSTGRES_DB: voltedge
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
     volumes:
       - ./docker/postgres/initdb:/docker-entrypoint-initdb.d:ro
       - pgdata:/var/lib/postgresql/data
@@ -18,20 +20,44 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    networks:
+      - voltedge
 
   mlflow:
     image: python:3.11-slim
+    container_name: voltedge-mlflow
     restart: unless-stopped
     environment:
       - MLFLOW_TRACKING_URI=http://0.0.0.0:5000
+      - AWS_ACCESS_KEY_ID=minioadmin
+      - AWS_SECRET_ACCESS_KEY=minioadmin
+      - MLFLOW_S3_ENDPOINT_URL=http://minio:9000
     volumes:
-      - ./docker/mlflow:/mlflow
-    command: /bin/sh -c "pip install --no-cache-dir mlflow && mlflow server --backend-store-uri sqlite:///mlflow.db --default-artifact-root /mlflow --host 0.0.0.0 --port 5000"
+      - mlflowdata:/mlflow
+    command: >
+      /bin/sh -c "
+      pip install --no-cache-dir mlflow boto3 &&
+      mlflow server 
+        --backend-store-uri sqlite:////mlflow/mlflow.db 
+        --default-artifact-root s3://mlflow/
+        --host 0.0.0.0 
+        --port 5000
+      "
     ports:
       - "5000:5000"
+    depends_on:
+      - minio
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - voltedge
 
   minio:
     image: minio/minio:latest
+    container_name: voltedge-minio
     command: server /data --console-address ":9001"
     environment:
       MINIO_ROOT_USER: minioadmin
@@ -41,36 +67,81 @@ services:
     ports:
       - "9000:9000"
       - "9001:9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - voltedge
 
   redis:
     image: redis:7-alpine
+    container_name: voltedge-redis
+    restart: unless-stopped
     ports:
       - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - voltedge
 
   api:
     image: python:3.11-slim
+    container_name: voltedge-api
     working_dir: /app
     volumes:
       - ./:/app:cached
-    command: /bin/sh -c "pip install --no-cache-dir -r requirements.txt || true; uvicorn serving.app:app --host 0.0.0.0 --port 8000 --reload"
+    environment:
+      - DATABASE_URL=postgresql://voltedge:voltedge@postgres:5432/voltedge
+      - MLFLOW_TRACKING_URI=http://mlflow:5000
+      - REDIS_URL=redis://redis:6379/0
+      - PYTHONUNBUFFERED=1
+    command: >
+      /bin/sh -c "
+      pip install --no-cache-dir -r requirements.txt || true;
+      uvicorn serving.app:app --host 0.0.0.0 --port 8000 --reload
+      "
     ports:
       - "8000:8000"
     depends_on:
-      - postgres
-      - mlflow
-      - minio
-      - redis
+      postgres:
+        condition: service_healthy
+      mlflow:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - voltedge
 
   worker:
     image: python:3.11-slim
+    container_name: voltedge-worker
     working_dir: /app
     volumes:
       - ./:/app:cached
-    command: /bin/sh -c "while true; do sleep 60; done"
+    environment:
+      - DATABASE_URL=postgresql://voltedge:voltedge@postgres:5432/voltedge
+      - REDIS_URL=redis://redis:6379/0
+      - PYTHONUNBUFFERED=1
+    command: /bin/sh -c "pip install --no-cache-dir -r requirements.txt || true; while true; do sleep 60; done"
     depends_on:
-      - postgres
-      - redis
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - voltedge
+
+networks:
+  voltedge:
+    name: voltedge-network
+    driver: bridge
 
 volumes:
   pgdata:
   miniodata:
+  mlflowdata:

@@ -74,6 +74,70 @@ Example
     acceptance_criteria: [pyproject.toml exists, requirements.txt exists]
     status: done
 
+  ## Phase 1 — Local dev infra (docker compose)
+
+  - id: phase1-local-infra
+    title: local dev infra (docker-compose)
+    description: bring up Postgres (pgvector), MLflow, MinIO, Redis, API and worker in docker-compose for local development
+    owner: @repo-owner
+    estimate: 6h
+    dependencies: [phase0-repo-scaffold]
+    acceptance_criteria:
+      - `docker/docker-compose.yml` present and documented
+      - Postgres has `vector` extension enabled on init
+      - MLflow reachable at configured port
+      - `.env.example` present
+    status: in-progress
+
+  ### Phase 1 tasks (atomic)
+  - id: phase1-docker-compose
+    title: add docker/docker-compose.yml
+    description: compose file with postgres (pgvector), mlflow, minio, redis, api, worker
+    owner: @repo-owner
+    estimate: 2h
+    dependencies: [phase1-local-infra]
+    acceptance_criteria:
+      - `docker/docker-compose.yml` exists
+      - compose brings up services (manual validation)
+    status: done
+
+  - id: phase1-init-extensions
+    title: init DB and enable extensions
+    description: add SQL scripts to enable pgvector and pg_trgm on first run
+    owner: @repo-owner
+    estimate: 30m
+    dependencies: [phase1-docker-compose]
+    acceptance_criteria: `docker/postgres/initdb/init_extensions.sql` exists and extensions are created on fresh DB
+    status: done
+
+  - id: phase1-mlflow-bucket
+    title: create MLflow artifact bucket in MinIO
+    description: ensure MLflow stores artifacts to a MinIO bucket on start (or document manual creation)
+    owner: @repo-owner
+    estimate: 1h
+    dependencies: [phase1-docker-compose]
+    acceptance_criteria: a bucket exists in MinIO used by MLflow
+    status: todo
+
+  - id: phase1-env
+    title: add .env example
+    description: provide .env.example with connection strings and creds for local stack
+    owner: @repo-owner
+    estimate: 15m
+    dependencies: [phase1-local-infra]
+    acceptance_criteria: `.env.example` present
+    status: done
+
+  - id: phase1-healthchecks
+    title: define simple healthchecks
+    description: ensure each service has a basic healthcheck (postgres pg_isready, mlflow reachable)
+    owner: @repo-owner
+    estimate: 30m
+    dependencies: [phase1-docker-compose]
+    acceptance_criteria: docker-compose healthchecks pass locally
+    status: todo
+
+
   - id: phase0-create-structure
     title: create base folders
     description: create folders infra,docker,data,ingestion,features,training,registry,serving,rag,agents,evaluations,observability,security,scripts,ops/n8n

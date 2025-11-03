@@ -1,7 +1,7 @@
 PYTHON ?= python
 VENV_DIR = .venv
 
-.PHONY: bootstrap ingest features train serve eval index up down clean
+.PHONY: bootstrap ingest features train serve eval index up down logs ps clean
 
 bootstrap:
 	@echo "Creating virtual environment and installing dependencies..."
@@ -31,10 +31,18 @@ index:
 	@echo "Stub: build RAG embedding index"
 
 up:
-	@echo "Start local infra (implement docker-compose in docker/docker-compose.yml)"
+	@echo "Starting local infra via docker-compose..."
+	docker compose -f docker/docker-compose.yml up -d --remove-orphans
 
 down:
-	@echo "Stop local infra"
+	@echo "Stopping local infra via docker-compose..."
+	docker compose -f docker/docker-compose.yml down
+
+logs:
+	docker compose -f docker/docker-compose.yml logs -f
+
+ps:
+	docker compose -f docker/docker-compose.yml ps
 
 clean:
 	rm -rf $(VENV_DIR)
