@@ -49,6 +49,58 @@ Example
       - GE expectations tests pass
     status: todo
 
+  ## Phase 0 — Repo scaffold (derived from Ideation)
+
+  - id: phase0-repo-scaffold
+    title: repository scaffold and developer quickstart
+    description: create pyproject, requirements, folder structure, Makefile targets and README quickstart
+    owner: @repo-owner
+    estimate: 3h
+    dependencies: []
+    acceptance_criteria:
+      - `pyproject.toml` or `requirements.txt` present
+      - base folders created and tracked
+      - `Makefile` with bootstrap target present
+      - `README.md` contains a 2-minute quickstart
+    status: in-progress
+
+  ### Phase 0 tasks (suggested atomic tasks)
+  - id: phase0-create-deps
+    title: add pyproject and requirements
+    description: add pyproject.toml and requirements.txt for Python 3.11+
+    owner: @repo-owner
+    estimate: 30m
+    dependencies: [phase0-repo-scaffold]
+    acceptance_criteria: [pyproject.toml exists, requirements.txt exists]
+    status: done
+
+  - id: phase0-create-structure
+    title: create base folders
+    description: create folders infra,docker,data,ingestion,features,training,registry,serving,rag,agents,evaluations,observability,security,scripts,ops/n8n
+    owner: @repo-owner
+    estimate: 30m
+    dependencies: [phase0-repo-scaffold]
+    acceptance_criteria: [folders exist in repo]
+    status: done
+
+  - id: phase0-create-makefile
+    title: add Makefile with bootstrap/ingest/etc targets
+    description: create simple Makefile with placeholder targets
+    owner: @repo-owner
+    estimate: 30m
+    dependencies: [phase0-repo-scaffold]
+    acceptance_criteria: [Makefile exists and `make bootstrap` creates venv]
+    status: done
+
+  - id: phase0-readme
+    title: add README quickstart
+    description: add README.md with 2-minute quickstart and next steps
+    owner: @repo-owner
+    estimate: 30m
+    dependencies: [phase0-repo-scaffold]
+    acceptance_criteria: [README.md contains quickstart and next steps]
+    status: done
+
 Change control
 --------------
 - All changes to `master_plan.md` require a PR with at least one reviewer. Security-impacting tasks require a security reviewer before merge.

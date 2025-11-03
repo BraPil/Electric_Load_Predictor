@@ -1,0 +1,21 @@
+[project]
+name = "voltedge"
+version = "0.1.0"
+description = "VoltEdge Electric Load Predictor — end-to-end forecasting + RAG system"
+requires-python = ">=3.11"
+
+dependencies = [
+  "fastapi>=0.95",
+  "uvicorn[standard]>=0.22",
+  "pandas>=2.0",
+  "scikit-learn>=1.2",
+  "sqlalchemy>=1.4",
+  "psycopg2-binary>=2.9",
+  "mlflow>=2.0",
+  "python-dotenv>=1.0",
+  "pytest>=7.0",
+]
+
+[build-system]
+requires = ["setuptools>=60.0", "wheel"]
+build-backend = "setuptools.build_meta"
