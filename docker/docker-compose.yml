@@ -1,0 +1,76 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: ankane/pgvector:postgres-15
+    restart: always
+    environment:
+      POSTGRES_USER: voltedge
+      POSTGRES_PASSWORD: voltedge
+      POSTGRES_DB: voltedge
+    volumes:
+      - ./docker/postgres/initdb:/docker-entrypoint-initdb.d:ro
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U voltedge"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  mlflow:
+    image: python:3.11-slim
+    restart: unless-stopped
+    environment:
+      - MLFLOW_TRACKING_URI=http://0.0.0.0:5000
+    volumes:
+      - ./docker/mlflow:/mlflow
+    command: /bin/sh -c "pip install --no-cache-dir mlflow && mlflow server --backend-store-uri sqlite:///mlflow.db --default-artifact-root /mlflow --host 0.0.0.0 --port 5000"
+    ports:
+      - "5000:5000"
+
+  minio:
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    volumes:
+      - miniodata:/data
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  api:
+    image: python:3.11-slim
+    working_dir: /app
+    volumes:
+      - ./:/app:cached
+    command: /bin/sh -c "pip install --no-cache-dir -r requirements.txt || true; uvicorn serving.app:app --host 0.0.0.0 --port 8000 --reload"
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+      - mlflow
+      - minio
+      - redis
+
+  worker:
+    image: python:3.11-slim
+    working_dir: /app
+    volumes:
+      - ./:/app:cached
+    command: /bin/sh -c "while true; do sleep 60; done"
+    depends_on:
+      - postgres
+      - redis
+
+volumes:
+  pgdata:
+  miniodata:
