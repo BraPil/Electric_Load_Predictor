@@ -13,7 +13,12 @@ bootstrap:
 	@echo "Bootstrap complete. Activate with: source $(VENV_DIR)/bin/activate (UNIX) or $(VENV_DIR)\\Scripts\\Activate.ps1 (PowerShell)"
 
 ingest:
-	@echo "Stub: run ingestion pipeline (implement ingestion/fetch_uci.py and ingestion/etl.py)"
+	@echo "Running ingestion pipeline..."
+	@echo "Step 1: Downloading UCI dataset..."
+	$(PYTHON) ingestion/fetch_uci.py
+	@echo "Step 2: Running ETL (Extract, Transform, Load)..."
+	$(PYTHON) ingestion/etl.py --input data/raw/household_power.zip
+	@echo "✓ Ingestion complete! Data ready in data/processed/"
 
 features:
 	@echo "Stub: run feature engineering (implement features/feature_store.py)"

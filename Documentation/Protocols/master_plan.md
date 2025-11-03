@@ -117,7 +117,8 @@ Example
     estimate: 1h
     dependencies: [phase1-docker-compose]
     acceptance_criteria: a bucket exists in MinIO used by MLflow
-    status: todo
+    status: blocked
+    notes: Requires Docker Desktop installation on Windows
 
   - id: phase1-env
     title: add .env example
@@ -135,7 +136,88 @@ Example
     estimate: 30m
     dependencies: [phase1-docker-compose]
     acceptance_criteria: docker-compose healthchecks pass locally
-    status: todo
+    status: blocked
+    notes: Requires Docker Desktop installation on Windows
+
+  ## Phase 2 — Ingestion pipeline scaffold
+
+  - id: phase2-ingestion-scaffold
+    title: ingestion pipeline scaffold
+    description: create ingestion module with UCI dataset fetcher and ETL pipeline
+    owner: @repo-owner
+    estimate: 4h
+    dependencies: [phase0-repo-scaffold]
+    acceptance_criteria:
+      - `ingestion/fetch_uci.py` downloads UCI dataset
+      - `ingestion/etl.py` processes and loads data
+      - data quality checks implemented
+      - README documentation complete
+    status: done
+
+  ### Phase 2 tasks (atomic)
+  - id: phase2-fetch-script
+    title: create fetch_uci.py
+    description: script to download UCI Individual Household Electric Power Consumption dataset
+    owner: @repo-owner
+    estimate: 1h
+    dependencies: [phase2-ingestion-scaffold]
+    acceptance_criteria:
+      - downloads dataset from UCI repository
+      - verifies file integrity (SHA256)
+      - saves to data/raw/
+      - CLI with --force and --output options
+    status: done
+
+  - id: phase2-etl-script
+    title: create etl.py (Extract, Transform, Load)
+    description: ETL pipeline to clean, transform, and load UCI dataset
+    owner: @repo-owner
+    estimate: 2h
+    dependencies: [phase2-fetch-script]
+    acceptance_criteria:
+      - extracts data from ZIP file
+      - handles missing values (marked as '?')
+      - resamples 1-minute → hourly intervals
+      - adds derived features (hour, day, weekend)
+      - validates data quality
+      - loads to Postgres and/or parquet file
+      - CLI with --limit and --skip-db options
+    status: done
+
+  - id: phase2-data-quality
+    title: create data_quality.py (pydantic validation)
+    description: pydantic schemas for data validation
+    owner: @repo-owner
+    estimate: 45m
+    dependencies: [phase2-ingestion-scaffold]
+    acceptance_criteria:
+      - PowerMeasurement schema with field validators
+      - range checks (power 0-20kW, voltage 200-260V)
+      - DataQualityReport model
+      - validate_dataframe() function
+    status: done
+
+  - id: phase2-makefile-integration
+    title: wire Makefile ingest target
+    description: update Makefile to run fetch + ETL pipeline
+    owner: @repo-owner
+    estimate: 15m
+    dependencies: [phase2-etl-script]
+    acceptance_criteria: `make ingest` runs complete pipeline
+    status: done
+
+  - id: phase2-documentation
+    title: create ingestion README
+    description: comprehensive documentation for ingestion module
+    owner: @repo-owner
+    estimate: 30m
+    dependencies: [phase2-ingestion-scaffold]
+    acceptance_criteria:
+      - explains dataset and measurements
+      - quick start guide
+      - explains each script in detail
+      - troubleshooting section
+    status: done
 
 
   - id: phase0-create-structure
