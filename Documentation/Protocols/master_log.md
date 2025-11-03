@@ -18,6 +18,9 @@ Last updated: 2025-11-02
 ## Log Index (where to find granular logs)
 - `Documentation/logs/` — chronological logs for tasks, named `YYYY-MM-DD_task-slug.md`
 
+### Example log entries
+- 2025-11-03: sample-plan-2025-11-03.md — initial plan log for master plan tasks — last-updated: 2025-11-03 — contact: @repo-owner
+
 ## How to update
 1. Create or update the sub-protocol file under `Documentation/Protocols/`.
 2. Add or update the entry in this master_log with date, short description and contact.

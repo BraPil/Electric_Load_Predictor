@@ -37,3 +37,15 @@ Storage and retention:
 - Do not commit secrets, raw traces, or PII to the repo. If such logging is necessary, store in a secure external store and add a short summary here.
 
 Maintainers should periodically (annual) audit `Documentation/logs/` for stale or irrelevant entries and archive old logs into `Documentation/logs/archive/` via a maintenance PR.
+ 
+Automation
+----------
+- This repository includes an automated validation script at `scripts/validate_logs.py` which enforces:
+  - per-issue log filename conventions (`<slug>-YYYY-MM-DD.md`),
+  - forbidden emojis/pictographs in log & protocol files,
+  - and that `Documentation/Protocols/master_log.md` contains references to per-issue logs.
+- A GitHub Actions workflow `.github/workflows/validate-logs.yml` runs this check on pull requests and pushes to `main`.
+
+Sample
+------
+- See `Documentation/logs/sample-plan-2025-11-03.md` for a minimal per-plan issue log example.

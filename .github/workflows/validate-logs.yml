@@ -1,0 +1,27 @@
+name: Validate logs and protocols
+
+on:
+  pull_request:
+    paths:
+      - 'Documentation/**'
+      - '.github/**'
+  push:
+    branches:
+      - main
+
+jobs:
+  validate-logs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Run log validation
+        run: |
+          python -m pip install --upgrade pip
+          python scripts/validate_logs.py
