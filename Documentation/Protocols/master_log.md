@@ -2,7 +2,7 @@
 
 This file is the repository's canonical index of sub-protocols, logs and their last-updated timestamps. Agents must update this file when adding or modifying sub-protocols or creating new logs.
 
-Last updated: 2025-11-03 (Phase 3 completion)
+Last updated: 2025-11-03 (Phase 4 completion)
 
 ## Format
 - Each entry: `- YYYY-MM-DD: filename.md — short description — last-updated: YYYY-MM-DD — contact: @username`
@@ -29,6 +29,7 @@ Last updated: 2025-11-03 (Phase 3 completion)
 - 2025-11-03: phase2-completion-2025-11-03.md — Phase 2 completion log with demo results, lessons learned, and next steps — last-updated: 2025-11-03 — contact: @repo-owner
 - 2025-11-03: restart-protocol-2025-11-03-final.md — final session checkpoint with complete state and continuation paths — last-updated: 2025-11-03 — contact: @repo-owner
 - 2025-11-03: phase3-completion-2025-11-03.md — Phase 3 feature engineering completion with 44 features, validation results, and bug fixes — last-updated: 2025-11-03 — contact: @repo-owner
+- 2025-11-03: phase4-completion-2025-11-03.md — Phase 4 model training completion with MLflow, SHAP, data leakage fix, and champion model selection (Random Forest R²=0.9994) — last-updated: 2025-11-03 — contact: @repo-owner
 
 ## How to update
 1. Create or update the sub-protocol file under `Documentation/Protocols/`.
