@@ -62,9 +62,10 @@ mlflow.db
 docker/mlflow/*.db
 docker/mlflow/mlflow.db
 
-# Logs
+# Application Logs (but NOT Documentation/logs/)
 *.log
 logs/
+!Documentation/logs/
 
 # Jupyter
 .ipynb_checkpoints/
