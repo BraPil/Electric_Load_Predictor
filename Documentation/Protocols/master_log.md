@@ -25,6 +25,9 @@ Last updated: 2025-11-03
 - 2025-11-03: sample-plan-2025-11-03.md — initial plan log for master plan tasks — last-updated: 2025-11-03 — contact: @repo-owner
 - 2025-11-03: phase0-phase1-review-2025-11-03.md — comprehensive review and improvements of Phase 0 and Phase 1 implementations — last-updated: 2025-11-03 — contact: @repo-owner
 - 2025-11-03: phase1-phase2-implementation-2025-11-03.md — Phase 1 verification tasks and complete Phase 2 ingestion pipeline implementation — last-updated: 2025-11-03 — contact: @repo-owner
+- 2025-11-03: restart-session-2025-11-03.md — comprehensive restart checkpoint for computer switch with complete file inventory and continuation plan — last-updated: 2025-11-03 — contact: @repo-owner
+- 2025-11-03: phase2-completion-2025-11-03.md — Phase 2 completion log with demo results, lessons learned, and next steps — last-updated: 2025-11-03 — contact: @repo-owner
+- 2025-11-03: restart-protocol-2025-11-03-final.md — final session checkpoint with complete state and continuation paths — last-updated: 2025-11-03 — contact: @repo-owner
 
 ## How to update
 1. Create or update the sub-protocol file under `Documentation/Protocols/`.

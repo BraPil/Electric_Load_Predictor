@@ -1,16 +1,32 @@
 PYTHON ?= python
-VENV_DIR = .venv
+CONDA_ENV = voltedge
 
-.PHONY: bootstrap ingest features train serve eval index up down logs ps clean
+.PHONY: bootstrap conda-create conda-update ingest test-ingest test-ingest-quick features train serve eval index up down logs ps clean
 
+# Conda-based bootstrap (recommended)
+conda-create:
+	@echo "Creating Conda environment 'voltedge' from environment.yml..."
+	conda env create -f environment.yml
+	@echo "✓ Conda environment created!"
+	@echo "Activate with: conda activate voltedge"
+
+conda-update:
+	@echo "Updating Conda environment from environment.yml..."
+	conda env update -f environment.yml --prune
+	@echo "✓ Environment updated!"
+
+# Legacy venv bootstrap (for systems without conda)
 bootstrap:
+	@echo "WARNING: Using venv (legacy). Conda is recommended for this project."
 	@echo "Creating virtual environment and installing dependencies..."
-	$(PYTHON) -m venv $(VENV_DIR)
-	$(VENV_DIR)/Scripts/pip install --upgrade pip || $(VENV_DIR)/bin/pip install --upgrade pip
+	$(PYTHON) -m venv .venv
+	.venv/Scripts/pip install --upgrade pip || .venv/bin/pip install --upgrade pip
 	if [ -f requirements.txt ]; then \
-		$(VENV_DIR)/Scripts/pip install -r requirements.txt || $(VENV_DIR)/bin/pip install -r requirements.txt; \
+		.venv/Scripts/pip install -r requirements.txt || .venv/bin/pip install -r requirements.txt; \
 	fi
-	@echo "Bootstrap complete. Activate with: source $(VENV_DIR)/bin/activate (UNIX) or $(VENV_DIR)\\Scripts\\Activate.ps1 (PowerShell)"
+	@echo "Bootstrap complete. Activate with: .venv\\Scripts\\Activate.ps1 (PowerShell)"
+	@echo ""
+	@echo "💡 TIP: Consider using Conda instead! See CONDA_SETUP_GUIDE.md"
 
 ingest:
 	@echo "Running ingestion pipeline..."
@@ -19,6 +35,14 @@ ingest:
 	@echo "Step 2: Running ETL (Extract, Transform, Load)..."
 	$(PYTHON) ingestion/etl.py --input data/raw/household_power.zip
 	@echo "✓ Ingestion complete! Data ready in data/processed/"
+
+test-ingest:
+	@echo "Running ingestion pipeline tests..."
+	$(PYTHON) scripts/test_ingestion.py
+
+test-ingest-quick:
+	@echo "Running quick ingestion test (10k rows)..."
+	$(PYTHON) scripts/test_ingestion.py --limit 10000
 
 features:
 	@echo "Stub: run feature engineering (implement features/feature_store.py)"
@@ -50,4 +74,8 @@ ps:
 	docker compose -f docker/docker-compose.yml ps
 
 clean:
-	rm -rf $(VENV_DIR)
+	@echo "Cleaning up..."
+	@echo "Remove Conda environment? Run: conda env remove -n $(CONDA_ENV)"
+	@echo "Remove venv? Delete .venv folder"
+	@echo "Remove data? Delete data/raw/ and data/processed/"
+
